@@ -13,7 +13,7 @@ steps:
   args:
       - '-c'
       - |
-        (docker build --no-cache -t gcr.io/${PROJECT_ID}/demo-app:"$(cat tag_version.txt | awk '{n=split($4,A,"="); print A[2];}')" -t gcr.io/${PROJECT_ID}/demo-app:$COMMIT_SHA .)
+        (docker build --no-cache -t gcr.io/${PROJECT_ID}/demo-app:"$(cat tag_version.txt | awk '{n=split($4,A,"="); print A[2];}')" -t gcr.io/${PROJECT_ID}/demo-app:$COMMIT_SHA -t gcr.io/${PROJECT_ID}/demo-app:$BRANCH_NAME .)
 - name: gcr.io/cloud-builders/docker
   entrypoint: 'sh'
   args:
