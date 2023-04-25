@@ -1,0 +1,50 @@
+steps:
+- name: gcr.io/cloud-builders/gsutil
+  args:
+      ['cp', 'gs://delfos-core-environments/frontend/delfos-ft-invoice/*', '.']
+- name: gcr.io/cloud-builders/gsutil
+  entrypoint: 'sh'
+  args:
+      - '-c'
+      - |
+        sh cicd_delfos.sh $COMMIT_SHA $BUILD_ID $_USERS_NOTIFICATIONS_DISCORD $_USERS_NOTIFICATIONS_SLACK STARTED $REPO_NAME
+- name: gcr.io/cloud-builders/gsutil
+  entrypoint: 'sh'
+  args:
+      - '-c'
+      - |
+        sh docker_tag.sh
+- name: gcr.io/cloud-builders/docker
+  entrypoint: 'sh'
+  args:
+      - '-c'
+      - |
+        (docker build --no-cache -t gcr.io/${PROJECT_ID}/delfos-ft-central:"$(cat tag_version.txt | awk '{n=split($4,A,"="); print A[2];}')" .) || (sh cicd_delfos.sh $COMMIT_SHA $BUILD_ID $_USERS_NOTIFICATIONS_DISCORD $_USERS_NOTIFICATIONS_SLACK ERROR $REPO_NAME && exit 1)
+- name: gcr.io/cloud-builders/docker
+  entrypoint: 'sh'
+  args:
+      - '-c'
+      - |
+        (docker push gcr.io/${PROJECT_ID}/delfos-ft-central:"$(cat tag_version.txt | awk '{n=split($4,A,"="); print A[2];}')") || (sh cicd_delfos.sh $COMMIT_SHA $BUILD_ID $_USERS_NOTIFICATIONS_DISCORD $_USERS_NOTIFICATIONS_SLACK ERROR $REPO_NAME && exit 1)
+- name: gcr.io/cloud-builders/gsutil
+  args:
+      [
+        'cp',
+        'tag_version.txt',
+        'gs://delfos-core-environments/frontend/delfos-ft-invoice/tag_version.txt',
+      ]
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: 'sh'
+  args:
+      - '-c'
+      - |
+        (gcloud run deploy delfos-app --region=us-central1 --image=gcr.io/${PROJECT_ID}/delfos-ft-central:"$(cat tag_version.txt | awk '{n=split($4,A,"="); print A[2];}')") || (sh cicd_delfos.sh $COMMIT_SHA $BUILD_ID $_USERS_NOTIFICATIONS_DISCORD $_USERS_NOTIFICATIONS_SLACK ERROR $REPO_NAME && exit 1)
+- name: gcr.io/cloud-builders/gsutil
+  entrypoint: 'sh'
+  args:
+      - '-c'
+      - |
+        sh cicd_delfos.sh $COMMIT_SHA $BUILD_ID $_USERS_NOTIFICATIONS_DISCORD $_USERS_NOTIFICATIONS_SLACK DONE $REPO_NAME
+options:
+  machineType: 'E2_HIGHCPU_8'
+timeout: 3600s
