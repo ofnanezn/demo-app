@@ -1,7 +1,7 @@
 steps:
 - name: gcr.io/cloud-builders/gsutil
   args:
-      ['cp', 'gs://delfos-core-environments/frontend/delfos-ft-invoice/*', '.']
+      ['cp', 'gs://demo-app-environments/backend/demo-app/*', '.']
 - name: gcr.io/cloud-builders/gsutil
   entrypoint: 'sh'
   args:
@@ -19,26 +19,26 @@ steps:
   args:
       - '-c'
       - |
-        (docker build --no-cache -t gcr.io/${PROJECT_ID}/delfos-ft-central:"$(cat tag_version.txt | awk '{n=split($4,A,"="); print A[2];}')" .) || (sh cicd_delfos.sh $COMMIT_SHA $BUILD_ID $_USERS_NOTIFICATIONS_DISCORD $_USERS_NOTIFICATIONS_SLACK ERROR $REPO_NAME && exit 1)
+        (docker build --no-cache -t gcr.io/${PROJECT_ID}/demo-app:"$(cat tag_version.txt | awk '{n=split($4,A,"="); print A[2];}')" .) || (sh cicd_delfos.sh $COMMIT_SHA $BUILD_ID $_USERS_NOTIFICATIONS_DISCORD $_USERS_NOTIFICATIONS_SLACK ERROR $REPO_NAME && exit 1)
 - name: gcr.io/cloud-builders/docker
   entrypoint: 'sh'
   args:
       - '-c'
       - |
-        (docker push gcr.io/${PROJECT_ID}/delfos-ft-central:"$(cat tag_version.txt | awk '{n=split($4,A,"="); print A[2];}')") || (sh cicd_delfos.sh $COMMIT_SHA $BUILD_ID $_USERS_NOTIFICATIONS_DISCORD $_USERS_NOTIFICATIONS_SLACK ERROR $REPO_NAME && exit 1)
+        (docker push gcr.io/${PROJECT_ID}/demo-app:"$(cat tag_version.txt | awk '{n=split($4,A,"="); print A[2];}')") || (sh cicd_delfos.sh $COMMIT_SHA $BUILD_ID $_USERS_NOTIFICATIONS_DISCORD $_USERS_NOTIFICATIONS_SLACK ERROR $REPO_NAME && exit 1)
 - name: gcr.io/cloud-builders/gsutil
   args:
       [
         'cp',
         'tag_version.txt',
-        'gs://delfos-core-environments/frontend/delfos-ft-invoice/tag_version.txt',
+        'gs://demo-app-environments/backend/demo-app/tag_version.txt',
       ]
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: 'sh'
   args:
       - '-c'
       - |
-        (gcloud run deploy delfos-app --region=us-central1 --image=gcr.io/${PROJECT_ID}/delfos-ft-central:"$(cat tag_version.txt | awk '{n=split($4,A,"="); print A[2];}')") || (sh cicd_delfos.sh $COMMIT_SHA $BUILD_ID $_USERS_NOTIFICATIONS_DISCORD $_USERS_NOTIFICATIONS_SLACK ERROR $REPO_NAME && exit 1)
+        (gcloud run deploy delfos-app --region=us-central1 --image=gcr.io/${PROJECT_ID}/demo-app:"$(cat tag_version.txt | awk '{n=split($4,A,"="); print A[2];}')") || (sh cicd_delfos.sh $COMMIT_SHA $BUILD_ID $_USERS_NOTIFICATIONS_DISCORD $_USERS_NOTIFICATIONS_SLACK ERROR $REPO_NAME && exit 1)
 - name: gcr.io/cloud-builders/gsutil
   entrypoint: 'sh'
   args:
