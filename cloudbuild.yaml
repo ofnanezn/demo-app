@@ -19,7 +19,7 @@ steps:
   args:
       - '-c'
       - |
-        (docker push -a gcr.io/${PROJECT_ID}/demo-app:"$(cat tag_version.txt | awk '{n=split($4,A,"="); print A[2];}')")
+        (docker push -a gcr.io/${PROJECT_ID}/demo-app)
 - name: gcr.io/cloud-builders/gsutil
   args:
       [
