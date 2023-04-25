@@ -15,7 +15,7 @@ def hello_world():  # put application's code here
             return f'Error. Response with status code != 200'
     except:
         return 'Error. DNS not found'"""
-    resp = f"""Hello, World. This is a Delfos app! V4
+    resp = f"""Hello, World. This is a Delfos app! V1
     Checking some environment variables...
     * ENV: {os.getenv('ENV')}
     * VERSION: {os.getenv('VERSION')}"""
