@@ -29,7 +29,7 @@ steps:
         || (echo "Error deploying. Rollbacking...") \
         || (gcloud container images delete gcr.io/data-test-skydropx/demo-app:"$(cat tag_version.txt | awk '{n=split($4,A,"="); print A[2];}')" --force-delete-tags) \
         || (sh tag_rollback.sh) \
-        || (gcloud run deploy delfos-app --region=us-central1 --image=gcr.io/${PROJECT_ID}/demo-app:"$(cat tag_version.txt | awk '{n=split($4,A,"="); print A[2];}')") && exit -1
+        || (gcloud run deploy delfos-app --region=us-central1 --image=gcr.io/${PROJECT_ID}/demo-app:"$(cat tag_version.txt | awk '{n=split($4,A,"="); print A[2];}')" && exit -1) 
 - name: gcr.io/cloud-builders/gsutil
   args:
       [
