@@ -20,6 +20,16 @@ steps:
       - '-c'
       - |
         (docker push -a gcr.io/${PROJECT_ID}/demo-app)
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: 'sh'
+  args:
+      - '-c'
+      - |
+        (gcloud run deploy delfos-app --region=us-central1 --image=gcr.io/${PROJECT_ID}/demo-app:"$(cat tag_version.txt | awk '{n=split($4,A,"="); print A[2];}')" \
+        || echo "Error deploying. Rollbacking..."
+        || gcloud container images delete gcr.io/data-test-skydropx/demo-app:"$(cat tag_version.txt | awk '{n=split($4,A,"="); print A[2];}')" --force-delete-tags) \
+        || sh tag_rollback.sh \
+        || gcloud run deploy delfos-app --region=us-central1 --image=gcr.io/${PROJECT_ID}/demo-app:"$(cat tag_version.txt | awk '{n=split($4,A,"="); print A[2];}')") && -1
 - name: gcr.io/cloud-builders/gsutil
   args:
       [
@@ -27,12 +37,6 @@ steps:
         'tag_version.txt',
         'gs://demo-app-environments/backend/demo-app/tag_version.txt',
       ]
-- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-  entrypoint: 'sh'
-  args:
-      - '-c'
-      - |
-        (gcloud run deploy delfos-app --region=us-central1 --image=gcr.io/${PROJECT_ID}/demo-app:"$(cat tag_version.txt | awk '{n=split($4,A,"="); print A[2];}')")
 options:
   machineType: 'E2_HIGHCPU_8'
 timeout: 3600s
